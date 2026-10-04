@@ -97,7 +97,8 @@ let PRODUCTS=null,cat='',cart=[],mode='外帶',cur=null,db=null,user=null,unsub=
 const pad=n=>String(n).padStart(2,'0');
 const WD='日一二三四五六',SL=[];for(let h=16;h<=19;h++)for(const m of [0,15,30,45]){const tt=h*60+m;if(tt>=990&&tt<=1170)SL.push(pad(h)+':'+pad(m))}
 const slot=(d,t)=>{const [h,m]=t.split(':');return new Date(d.getFullYear(),d.getMonth(),d.getDate(),+h,+m)};
-function fillDates(){const now=new Date(),lim=now.getTime()+18e5,sel=$('wd');sel.innerHTML='';let n=0;for(let i=0;i<28&&n<10;i++){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i),g=d.getDay();if(g<3||g>6||!SL.some(t=>slot(d,t)>lim))continue;const o=document.createElement('option');o.value=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());o.textContent=`${d.getMonth()+1}月${d.getDate()}日（週${WD[g]}）`;sel.append(o);n++}fillTimes()}
+const CLOSED=[]; /* 特殊休息日，格式 '2026-10-10'，多個用逗號隔開 */
+function fillDates(){const now=new Date(),lim=now.getTime()+18e5,sel=$('wd');sel.innerHTML='';let n=0;for(let i=0;i<28&&n<10;i++){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i),g=d.getDay();if(g<3||g>6||CLOSED.includes(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'))||!SL.some(t=>slot(d,t)>lim))continue;const o=document.createElement('option');o.value=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());o.textContent=`${d.getMonth()+1}月${d.getDate()}日（週${WD[g]}）`;sel.append(o);n++}fillTimes()}
 function fillTimes(){const v=$('wd').value,t=$('wt');t.innerHTML='';if(v){const [y,m,d]=v.split('-').map(Number),day=new Date(y,m-1,d),lim=Date.now()+18e5;SL.filter(s=>slot(day,s)>lim).forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent='下午 '+(+s.slice(0,2)-12)+s.slice(2);t.append(o)})}sync()}
 function sync(){$('when').value=$('wd').value&&$('wt').value?$('wd').value+'T'+$('wt').value:''}
 $('wd').onchange=fillTimes;$('wt').onchange=sync;fillDates();
